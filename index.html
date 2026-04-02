@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>新德租赁 · 订单管理后台 | 重庆联新德科技</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #eef2f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            padding: 1.2rem 1rem 2rem;
+            color: #1a2c3e;
+            position: relative;
+        }
+
+        /* 右侧固定公司名 — 竖排醒目大字 */
+        .vertical-company {
+            position: fixed;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-family: system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            letter-spacing: 10px;
+            color: #d9512c;
+            background: linear-gradient(135deg, #e55a32, #b83a1a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 18px rgba(210, 80, 40, 0.5);
+            white-space: nowrap;
+            z-index: 99;
+            pointer-events: none;
+            opacity: 0.92;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
+        }
+
+        /* 移动端缩小一点但依然醒目 */
+        @media (max-width: 640px) {
+            .vertical-company {
+                font-size: 1.1rem;
+                letter-spacing: 6px;
+                right: 6px;
+                opacity: 0.85;
+            }
+            body {
+                padding-right: 1.8rem;
+            }
+        }
+        @media (min-width: 768px) {
+            .vertical-company {
+                font-size: 1.9rem;
+                letter-spacing: 12px;
+                right: 24px;
+            }
+        }
+
+        /* 后台容器增加右侧留白避免被水印遮挡 */
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            padding-right: 10px;
+        }
+
+        /* 头部导航 */
+        .admin-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .logo-area h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(125deg, #1a2f4e, #2c4c7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .logo-area p {
+            font-size: 0.7rem;
+            color: #5e6f8d;
+        }
+        .stats-badge {
+            background: #f0f4fa;
+            padding: 0.4rem 1rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2c5a7a;
+        }
+        .stats-badge span {
+            font-weight: 800;
+            color: #1f4b6e;
+            font-size: 1.1rem;
+        }
+
+        /* 添加订单表单卡片 */
+        .add-order-card {
+            background: white;
+            border-radius: 1.5rem;
+            margin-bottom: 1.8rem;
+            padding: 1.2rem 1.2rem 1.4rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #eaf0f6;
+            transition: all 0.2s;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e3b4f;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 4px solid #e55a32;
+            padding-left: 0.7rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .input-field label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4b6589;
+            letter-spacing: 0.3px;
+        }
+        .input-field input, .input-field select {
+            padding: 0.7rem 0.9rem;
+            border-radius: 1rem;
+            border: 1px solid #dce5ef;
+            font-size: 0.85rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+            background: white;
+        }
+        .input-field input:focus, .input-field select:focus {
+            border-color: #2c7cb6;
+            box-shadow: 0 0 0 2px rgba(44,124,182,0.1);
+        }
+        .add-btn {
+            background: #e55a32;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+        .add-btn:active {
+            transform: scale(0.97);
+            background: #c2410c;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            background: white;
+            border-radius: 1.2rem;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: flex-end;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .filter-group {
+            flex: 1;
+            min-width: 130px;
+        }
+        .filter-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4b6589;
+            margin-bottom: 0.25rem;
+        }
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border-radius: 1rem;
+            border: 1px solid #dce5ef;
+            background: white;
+            font-size: 0.85rem;
+        }
+        .search-btn {
+            background: #1f4b6e;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .reset-btn {
+            background: #eef2f8;
+            color: #2c5a7a;
+            border: 1px solid #dce5ef;
+        }
+
+        /* 统计卡片 */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 1.2rem;
+            padding: 0.9rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border-left: 4px solid #2c7cb6;
+        }
+        .stat-card .stat-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #6c819e;
+        }
+        .stat-card .stat-number {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #1e3b4f;
+        }
+
+        /* 订单表格 */
+        .orders-table {
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 1px solid #eaf0f6;
+        }
+        .table-header {
+            display: none;
+            background: #f8fafd;
+            padding: 0.9rem 1rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #2b4b6e;
+            border-bottom: 1px solid #e2ecf5;
+        }
+        .order-row {
+            display: block;
+            border-bottom: 1px solid #edf2f8;
+            padding: 1rem;
+        }
+        .order-field {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+            gap: 0.3rem;
+        }
+        .field-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #6883a0;
+            width: 70px;
+            flex-shrink: 0;
+        }
+        .field-value {
+            font-size: 0.85rem;
+            color: #1e2f3f;
+            font-weight: 500;
+            flex: 1;
+        }
+        .order-status {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: #eef2fa;
+        }
+        .status-paid { background: #e0f2e9; color: #1f7840; }
+        .status-pending { background: #fff0e5; color: #c2410c; }
+        .status-renting { background: #e3f0ff; color: #1f6392; }
+        .action-buttons {
+            margin-top: 0.6rem;
+            display: flex;
+            gap: 0.6rem;
+            justify-content: flex-end;
+        }
+        .btn-sm {
+            padding: 0.35rem 1rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            background: #f0f4fa;
+            color: #2c5a7a;
+        }
+        .btn-primary-sm { background: #1f4b6e; color: white; }
+        .btn-danger-sm { background: #fee9e6; color: #bc3f1e; }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+            padding: 1rem;
+        }
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-card {
+            background: white;
+            max-width: 460px;
+            width: 100%;
+            border-radius: 2rem;
+            overflow: hidden;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.2rem 1.4rem 0.6rem;
+            font-weight: 700;
+            border-bottom: 1px solid #eff3fa;
+        }
+        .modal-body { padding: 1.2rem 1.4rem; }
+        .modal-field { margin-bottom: 1rem; }
+        .modal-field label { font-size: 0.75rem; font-weight: 600; color: #4a688b; display: block; margin-bottom: 0.3rem; }
+        .modal-field input, .modal-field select { width: 100%; padding: 0.7rem; border-radius: 1rem; border: 1px solid #d4e0ec; font-size: 0.85rem; }
+        .modal-buttons { display: flex; gap: 0.8rem; margin-top: 1.2rem; }
+        .close-modal { font-size: 1.8rem; cursor: pointer; color: #98a9c2; }
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2f3ee6;
+            color: white;
+            padding: 0.6rem 1.3rem;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            z-index: 1100;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .toast-msg.show { opacity: 1; }
+        .footer-note {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #8c9bb0;
+        }
+        @media (min-width: 760px) {
+            .table-header {
+                display: grid;
+                grid-template-columns: 80px 1.5fr 1.2fr 100px 100px 140px;
+                gap: 0.5rem;
+                padding: 0.9rem 1rem;
+            }
+            .order-row {
+                display: grid;
+                grid-template-columns: 80px 1.5fr 1.2fr 100px 100px 140px;
+                gap: 0.5rem;
+                align-items: center;
+                padding: 0.8rem 1rem;
+            }
+            .order-field { display: contents; }
+            .field-label { display: none; }
+            .action-buttons { margin-top: 0; justify-content: flex-start; }
+        }
+        button { touch-action: manipulation; }
+    </style>
+</head>
+<body>
+
+<!-- 右侧竖排大水印：公司名称醒目彩色 -->
+<div class="vertical-company">重庆联新德科技有限公司</div>
+
+<div class="admin-container">
+    <!-- 头部 -->
+    <div class="admin-header">
+        <div class="logo-area">
+            <h2>📋 新德租赁 · 订单后台</h2>
+            <p>设备租赁订单管理 | 实时状态更新</p>
+        </div>
+        <div class="stats-badge">📦 总订单 <span id="totalOrderCount">0</span></div>
+    </div>
+
+    <!-- ✨ 新增订单表单 -->
+    <div class="add-order-card">
+        <div class="section-title">
+            <span>➕</span> 添加新租赁订单
+        </div>
+        <div class="form-grid">
+            <div class="input-field">
+                <label>设备名称 *</label>
+                <input type="text" id="newDeviceName" placeholder="例: Apple iPhone 17 Pro Max" autocomplete="off">
+            </div>
+            <div class="input-field">
+                <label>客户手机号 *</label>
+                <input type="tel" id="newPhone" placeholder="11位手机号" maxlength="11">
+            </div>
+            <div class="input-field">
+                <label>月租金 (¥) *</label>
+                <input type="number" id="newPrice" placeholder="租金金额" step="1">
+            </div>
+            <div class="input-field">
+                <label>订单状态</label>
+                <select id="newStatus">
+                    <option value="pending">待确认</option>
+                    <option value="renting">租赁中</option>
+                    <option value="completed">已完成</option>
+                </select>
+            </div>
+            <div class="input-field">
+                <label>备注 (选填)</label>
+                <input type="text" id="newRemark" placeholder="租期/预约信息">
+            </div>
+        </div>
+        <button class="add-btn" id="addOrderBtn">✨ 立即创建订单</button>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-row">
+        <div class="stat-card"><div class="stat-title">待处理预约</div><div class="stat-number" id="pendingCount">0</div></div>
+        <div class="stat-card sub"><div class="stat-title">租赁中</div><div class="stat-number" id="rentingCount">0</div></div>
+        <div class="stat-card pending"><div class="stat-title">已完成/已归还</div><div class="stat-number" id="completedCount">0</div></div>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+        <div class="filter-group"><label>🔍 订单状态</label><select id="statusFilter"><option value="all">全部</option><option value="pending">待确认</option><option value="renting">租赁中</option><option value="completed">已完成</option></select></div>
+        <div class="filter-group"><label>📱 手机号</label><input type="text" id="phoneSearch" placeholder="输入手机号查询"></div>
+        <div class="filter-group"><label>💻 设备名称</label><input type="text" id="deviceSearch" placeholder="关键词"></div>
+        <button class="search-btn" id="searchBtn">🔍 筛选</button>
+        <button class="search-btn reset-btn" id="resetBtn">重置</button>
+    </div>
+
+    <!-- 订单列表 -->
+    <div class="orders-table">
+        <div class="table-header">
+            <span>订单ID</span><span>设备信息</span><span>客户手机</span><span>月租金(¥)</span><span>状态</span><span>操作</span>
+        </div>
+        <div id="ordersListContainer"></div>
+    </div>
+    <div class="footer-note">✅ 支持添加订单、编辑、状态流转 | 右侧公司标识为重庆联新德科技</div>
+</div>
+
+<!-- 编辑弹窗 -->
+<div id="editModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header"><span>✏️ 编辑订单</span><span class="close-modal" id="closeEditModalBtn">&times;</span></div>
+        <div class="modal-body">
+            <input type="hidden" id="editOrderId">
+            <div class="modal-field"><label>设备名称</label><input type="text" id="editDeviceName"></div>
+            <div class="modal-field"><label>客户手机号</label><input type="text" id="editPhone" maxlength="11"></div>
+            <div class="modal-field"><label>月租金 (¥)</label><input type="number" id="editPrice" step="1"></div>
+            <div class="modal-field"><label>订单状态</label><select id="editStatus"><option value="pending">待确认</option><option value="renting">租赁中</option><option value="completed">已完成</option></select></div>
+            <div class="modal-field"><label>备注</label><input type="text" id="editRemark"></div>
+            <div class="modal-buttons"><button class="search-btn" id="saveEditBtn">保存修改</button><button class="search-btn reset-btn" id="cancelEditBtn">取消</button></div>
+        </div>
+    </div>
+</div>
+
+<div id="globalToast" class="toast-msg">✅ 操作成功</div>
+
+<script>
+    // ---------- 模拟订单数据 ----------
+    let orders = [
+        { id: 1001, deviceName: "Apple iPhone 17 Pro Max", phone: "13812345678", price: 2166, status: "pending", remark: "预约时间 2026-04-03", createdAt: "2026-04-01" },
+        { id: 1002, deviceName: "华为荣耀MateBook D14 锐龙版", phone: "15987654321", price: 1216, status: "renting", remark: "租期一个月，已发顺丰", createdAt: "2026-03-28" },
+        { id: 1003, deviceName: "Apple MacBook Air M1", phone: "17723238990", price: 2066, status: "completed", remark: "已归还，押金退还", createdAt: "2026-03-20" },
+        { id: 1004, deviceName: "ThinkPad T460 工作站", phone: "18856783412", price: 1566, status: "pending", remark: "企业客户预约，待审核", createdAt: "2026-04-02" },
+        { id: 1005, deviceName: "Apple iPhone 17 Pro", phone: "13566778899", price: 1950, status: "renting", remark: "高端商务机，租期2个月", createdAt: "2026-03-25" },
+        { id: 1006, deviceName: "小米 RedmiBook 商务本", phone: "15622334455", price: 1988, status: "pending", remark: "学生优惠季", createdAt: "2026-04-01" },
+        { id: 1007, deviceName: "惠普 Zbook 15 G3 工作站", phone: "18933445566", price: 1888, status: "renting", remark: "设计师专用，已签合同", createdAt: "2026-03-30" },
+        { id: 1008, deviceName: "Apple iPhone 16 Plus", phone: "15099887766", price: 1950, status: "completed", remark: "租期结束，设备完好", createdAt: "2026-03-15" },
+        { id: 1009, deviceName: "联想ThinkPad T440 经典版", phone: "18612348765", price: 1455, status: "pending", remark: "企业免押金预约", createdAt: "2026-04-02" },
+        { id: 1010, deviceName: "荣耀MateBook D14 轻薄本", phone: "13822334455", price: 1366, status: "renting", remark: "网课专用，已发货", createdAt: "2026-03-29" }
+    ];
+
+    let nextId = 1011;
+
+    // DOM 元素
+    const ordersContainer = document.getElementById('ordersListContainer');
+    const statusFilter = document.getElementById('statusFilter');
+    const phoneSearch = document.getElementById('phoneSearch');
+    const deviceSearch = document.getElementById('deviceSearch');
+    const searchBtn = document.getElementById('searchBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const totalOrderSpan = document.getElementById('totalOrderCount');
+    const pendingCountSpan = document.getElementById('pendingCount');
+    const rentingCountSpan = document.getElementById('rentingCount');
+    const completedCountSpan = document.getElementById('completedCount');
+
+    // 新增表单元素
+    const newDeviceName = document.getElementById('newDeviceName');
+    const newPhone = document.getElementById('newPhone');
+    const newPrice = document.getElementById('newPrice');
+    const newStatus = document.getElementById('newStatus');
+    const newRemark = document.getElementById('newRemark');
+    const addOrderBtn = document.getElementById('addOrderBtn');
+
+    // 弹窗相关
+    const editModal = document.getElementById('editModal');
+    const editOrderId = document.getElementById('editOrderId');
+    const editDeviceName = document.getElementById('editDeviceName');
+    const editPhone = document.getElementById('editPhone');
+    const editPrice = document.getElementById('editPrice');
+    const editStatus = document.getElementById('editStatus');
+    const editRemark = document.getElementById('editRemark');
+    const saveEditBtn = document.getElementById('saveEditBtn');
+    const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const toastEl = document.getElementById('globalToast');
+
+    function showToast(msg, isError = false) {
+        toastEl.innerText = msg || (isError ? '❌ 操作失败' : '✅ 操作成功');
+        toastEl.classList.add('show');
+        setTimeout(() => toastEl.classList.remove('show'), 2000);
+    }
+
+    function updateStats() {
+        totalOrderSpan.innerText = orders.length;
+        pendingCountSpan.innerText = orders.filter(o => o.status === 'pending').length;
+        rentingCountSpan.innerText = orders.filter(o => o.status === 'renting').length;
+        completedCountSpan.innerText = orders.filter(o => o.status === 'completed').length;
+    }
+
+    function statusToCN(status) {
+        if (status === 'pending') return '待确认';
+        if (status === 'renting') return '租赁中';
+        if (status === 'completed') return '已完成';
+        return status;
+    }
+    function getStatusClass(status) {
+        if (status === 'pending') return 'status-pending';
+        if (status === 'renting') return 'status-renting';
+        if (status === 'completed') return 'status-paid';
+        return '';
+    }
+
+    function renderOrders(filteredOrders) {
+        if (!filteredOrders.length) {
+            ordersContainer.innerHTML = `<div style="padding: 2rem; text-align:center; color:#8ba0bc;">暂无订单数据</div>`;
+            return;
+        }
+        let html = '';
+        filteredOrders.forEach(order => {
+            html += `
+                <div class="order-row" data-order-id="${order.id}">
+                    <div class="order-field"><span class="field-label">订单号</span><span class="field-value">#${order.id}</span></div>
+                    <div class="order-field"><span class="field-label">设备</span><span class="field-value"><strong>${escapeHtml(order.deviceName)}</strong><br><span style="font-size:0.7rem; color:#7b8aa3;">${order.remark ? order.remark.substring(0, 28) : ''}</span></span></div>
+                    <div class="order-field"><span class="field-label">手机号</span><span class="field-value">${order.phone}</span></div>
+                    <div class="order-field"><span class="field-label">月租金</span><span class="field-value">¥${order.price}</span></div>
+                    <div class="order-field"><span class="field-label">状态</span><span class="field-value"><span class="order-status ${getStatusClass(order.status)}">${statusToCN(order.status)}</span></span></div>
+                    <div class="action-buttons">
+                        <button class="btn-sm btn-primary-sm" data-action="edit" data-id="${order.id}">✏️ 编辑</button>
+                        <button class="btn-sm btn-danger-sm" data-action="delete" data-id="${order.id}">🗑 删除</button>
+                        ${order.status !== 'completed' ? `<button class="btn-sm" data-action="markComplete" data-id="${order.id}">✅ 完成归还</button>` : ''}
+                        ${order.status === 'pending' ? `<button class="btn-sm" data-action="startRent" data-id="${order.id}">🚀 开始租赁</button>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        ordersContainer.innerHTML = html;
+        attachOrderEvents();
+    }
+
+    function attachOrderEvents() {
+        document.querySelectorAll('[data-action="edit"]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openEditModal(parseInt(btn.dataset.id)); }));
+        document.querySelectorAll('[data-action="delete"]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); if(confirm('确认删除该订单吗？')) deleteOrderById(parseInt(btn.dataset.id)); }));
+        document.querySelectorAll('[data-action="markComplete"]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); updateOrderStatus(parseInt(btn.dataset.id), 'completed'); }));
+        document.querySelectorAll('[data-action="startRent"]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); updateOrderStatus(parseInt(btn.dataset.id), 'renting'); }));
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+
+    function updateOrderStatus(id, newStatus) {
+        const order = orders.find(o => o.id === id);
+        if (order) {
+            order.status = newStatus;
+            if (newStatus === 'renting') order.remark = (order.remark ? order.remark + ' · 已转为租赁中' : '已转为租赁中');
+            if (newStatus === 'completed') order.remark = (order.remark ? order.remark + ' · 已完成归还' : '已完成归还');
+            applyFiltersAndRender();
+            showToast(`订单 #${id} 状态已更新为 ${statusToCN(newStatus)}`);
+            updateStats();
+        }
+    }
+
+    function deleteOrderById(id) {
+        orders = orders.filter(o => o.id !== id);
+        applyFiltersAndRender();
+        updateStats();
+        showToast(`订单 #${id} 已删除`);
+    }
+
+    // 添加新订单
+    function addNewOrder() {
+        const device = newDeviceName.value.trim();
+        const phone = newPhone.value.trim();
+        const price = parseFloat(newPrice.value);
+        if (!device) { showToast('请填写设备名称', true); return; }
+        if (!/^1[0-9]{10}$/.test(phone)) { showToast('请输入正确的11位手机号', true); return; }
+        if (isNaN(price) || price <= 0) { showToast('租金必须大于0', true); return; }
+        const newOrder = {
+            id: nextId++,
+            deviceName: device,
+            phone: phone,
+            price: price,
+            status: newStatus.value,
+            remark: newRemark.value.trim() || '新预约订单',
+            createdAt: new Date().toISOString().slice(0,10)
+        };
+        orders.unshift(newOrder);
+        // 清空表单
+        newDeviceName.value = '';
+        newPhone.value = '';
+        newPrice.value = '';
+        newStatus.value = 'pending';
+        newRemark.value = '';
+        applyFiltersAndRender();
+        updateStats();
+        showToast(`✅ 订单 #${newOrder.id} 添加成功`);
+    }
+
+    function openEditModal(id) {
+        const order = orders.find(o => o.id === id);
+        if (!order) return;
+        editOrderId.value = order.id;
+        editDeviceName.value = order.deviceName;
+        editPhone.value = order.phone;
+        editPrice.value = order.price;
+        editStatus.value = order.status;
+        editRemark.value = order.remark || '';
+        editModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() { editModal.classList.remove('active'); document.body.style.overflow = ''; }
+    function saveEditOrder() {
+        const id = parseInt(editOrderId.value);
+        const idx = orders.findIndex(o => o.id === id);
+        if (idx === -1) { showToast('订单不存在', true); closeModal(); return; }
+        const newPhoneVal = editPhone.value.trim();
+        if (!/^1[0-9]{10}$/.test(newPhoneVal)) { showToast('手机号格式错误', true); return; }
+        const newPriceVal = parseFloat(editPrice.value);
+        if (isNaN(newPriceVal) || newPriceVal <= 0) { showToast('租金需大于0', true); return; }
+        orders[idx] = { ...orders[idx], deviceName: editDeviceName.value.trim() || orders[idx].deviceName, phone: newPhoneVal, price: newPriceVal, status: editStatus.value, remark: editRemark.value };
+        applyFiltersAndRender();
+        updateStats();
+        showToast(`订单 #${id} 更新成功`);
+        closeModal();
+    }
+
+    function getFilteredOrders() {
+        let filtered = [...orders];
+        const statusVal = statusFilter.value;
+        const phoneVal = phoneSearch.value.trim();
+        const deviceVal = deviceSearch.value.trim().toLowerCase();
+        if (statusVal !== 'all') filtered = filtered.filter(o => o.status === statusVal);
+        if (phoneVal) filtered = filtered.filter(o => o.phone.includes(phoneVal));
+        if (deviceVal) filtered = filtered.filter(o => o.deviceName.toLowerCase().includes(deviceVal));
+        return filtered;
+    }
+    function applyFiltersAndRender() { renderOrders(getFilteredOrders()); }
+    function resetFilters() { statusFilter.value = 'all'; phoneSearch.value = ''; deviceSearch.value = ''; applyFiltersAndRender(); }
+
+    function init() {
+        renderOrders(orders);
+        updateStats();
+        searchBtn.addEventListener('click', applyFiltersAndRender);
+        resetBtn.addEventListener('click', resetFilters);
+        addOrderBtn.addEventListener('click', addNewOrder);
+        saveEditBtn.addEventListener('click', saveEditOrder);
+        closeEditModalBtn.addEventListener('click', closeModal);
+        cancelEditBtn.addEventListener('click', closeModal);
+        editModal.addEventListener('click', (e) => { if(e.target === editModal) closeModal(); });
+        phoneSearch.addEventListener('keypress', (e) => { if(e.key === 'Enter') applyFiltersAndRender(); });
+        deviceSearch.addEventListener('keypress', (e) => { if(e.key === 'Enter') applyFiltersAndRender(); });
+    }
+    init();
+</script>
+</body>
+</html>
