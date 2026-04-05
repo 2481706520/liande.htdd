@@ -1,726 +1,1021 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>新德租赁 · 订单管理后台 | 重庆联新德科技</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>联德租赁 | 智能设备租赁管理系统</title>
+    <!-- 引入字体与图标库 -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #eef2f5;
-            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            padding: 1.2rem 1rem 2rem;
-            color: #1a2c3e;
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fb;
+            color: #1e293b;
+            height: 100vh;
+            overflow: hidden;
             position: relative;
         }
 
-        /* 右侧固定公司名 — 竖排醒目大字 */
-        .vertical-company {
-            position: fixed;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            font-family: system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            font-weight: 900;
-            font-size: 1.6rem;
-            letter-spacing: 10px;
-            color: #d9512c;
-            background: linear-gradient(135deg, #e55a32, #b83a1a);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            text-shadow: 2px 2px 18px rgba(210, 80, 40, 0.5);
-            white-space: nowrap;
-            z-index: 99;
-            pointer-events: none;
-            opacity: 0.92;
-            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
-        }
-
-        /* 移动端缩小一点但依然醒目 */
-        @media (max-width: 640px) {
-            .vertical-company {
-                font-size: 1.1rem;
-                letter-spacing: 6px;
-                right: 6px;
-                opacity: 0.85;
-            }
-            body {
-                padding-right: 1.8rem;
-            }
-        }
-        @media (min-width: 768px) {
-            .vertical-company {
-                font-size: 1.9rem;
-                letter-spacing: 12px;
-                right: 24px;
-            }
-        }
-
-        /* 后台容器增加右侧留白避免被水印遮挡 */
-        .admin-container {
-            max-width: 1400px;
-            margin: 0 auto;
+        /* 整体布局 */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
             position: relative;
-            z-index: 2;
-            padding-right: 10px;
         }
 
-        /* 头部导航 */
-        .admin-header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            background: white;
-            padding: 0.8rem 1.2rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .logo-area h2 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(125deg, #1a2f4e, #2c4c7c);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-        .logo-area p {
-            font-size: 0.7rem;
-            color: #5e6f8d;
-        }
-        .stats-badge {
-            background: #f0f4fa;
-            padding: 0.4rem 1rem;
-            border-radius: 60px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #2c5a7a;
-        }
-        .stats-badge span {
-            font-weight: 800;
-            color: #1f4b6e;
-            font-size: 1.1rem;
-        }
-
-        /* 添加订单表单卡片 */
-        .add-order-card {
-            background: white;
-            border-radius: 1.5rem;
-            margin-bottom: 1.8rem;
-            padding: 1.2rem 1.2rem 1.4rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            border: 1px solid #eaf0f6;
-            transition: all 0.2s;
-        }
-        .section-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #1e3b4f;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-left: 4px solid #e55a32;
-            padding-left: 0.7rem;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        .input-field {
+        /* ========= 侧边栏样式 - 移动端默认隐藏，通过汉堡菜单激活 ========= */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+            color: #e2e8f0;
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
-        }
-        .input-field label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #4b6589;
-            letter-spacing: 0.3px;
-        }
-        .input-field input, .input-field select {
-            padding: 0.7rem 0.9rem;
-            border-radius: 1rem;
-            border: 1px solid #dce5ef;
-            font-size: 0.85rem;
-            font-family: inherit;
-            outline: none;
-            transition: all 0.2s;
-            background: white;
-        }
-        .input-field input:focus, .input-field select:focus {
-            border-color: #2c7cb6;
-            box-shadow: 0 0 0 2px rgba(44,124,182,0.1);
-        }
-        .add-btn {
-            background: #e55a32;
-            color: white;
-            border: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: 2rem;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 0.5rem;
-        }
-        .add-btn:active {
-            transform: scale(0.97);
-            background: #c2410c;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.25s ease-in-out;
+            z-index: 1000;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            transform: translateX(-100%);
+            overflow-y: auto;
         }
 
-        /* 筛选栏 */
-        .filter-bar {
-            background: white;
-            border-radius: 1.2rem;
-            padding: 1rem 1.2rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-            align-items: flex-end;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .filter-group {
-            flex: 1;
-            min-width: 130px;
-        }
-        .filter-group label {
-            display: block;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #4b6589;
-            margin-bottom: 0.25rem;
-        }
-        .filter-group select, .filter-group input {
-            width: 100%;
-            padding: 0.6rem 0.8rem;
-            border-radius: 1rem;
-            border: 1px solid #dce5ef;
-            background: white;
-            font-size: 0.85rem;
-        }
-        .search-btn {
-            background: #1f4b6e;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 2rem;
-            font-weight: 600;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-        .reset-btn {
-            background: #eef2f8;
-            color: #2c5a7a;
-            border: 1px solid #dce5ef;
+        /* 侧边栏打开状态 */
+        .sidebar.open {
+            transform: translateX(0);
         }
 
-        /* 统计卡片 */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 1.2rem;
-            padding: 0.9rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-            border-left: 4px solid #2c7cb6;
-        }
-        .stat-card .stat-title {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #6c819e;
-        }
-        .stat-card .stat-number {
-            font-size: 1.7rem;
-            font-weight: 800;
-            color: #1e3b4f;
+        /* 桌面端侧边栏常驻 */
+        @media (min-width: 992px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                z-index: 10;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
         }
 
-        /* 订单表格 */
-        .orders-table {
-            background: white;
-            border-radius: 1.5rem;
-            overflow: hidden;
-            border: 1px solid #eaf0f6;
-        }
-        .table-header {
-            display: none;
-            background: #f8fafd;
-            padding: 0.9rem 1rem;
-            font-weight: 700;
-            font-size: 0.8rem;
-            color: #2b4b6e;
-            border-bottom: 1px solid #e2ecf5;
-        }
-        .order-row {
-            display: block;
-            border-bottom: 1px solid #edf2f8;
-            padding: 1rem;
-        }
-        .order-field {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            margin-bottom: 0.5rem;
-            gap: 0.3rem;
-        }
-        .field-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #6883a0;
-            width: 70px;
-            flex-shrink: 0;
-        }
-        .field-value {
-            font-size: 0.85rem;
-            color: #1e2f3f;
-            font-weight: 500;
-            flex: 1;
-        }
-        .order-status {
-            display: inline-block;
-            padding: 0.2rem 0.7rem;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            background: #eef2fa;
-        }
-        .status-paid { background: #e0f2e9; color: #1f7840; }
-        .status-pending { background: #fff0e5; color: #c2410c; }
-        .status-renting { background: #e3f0ff; color: #1f6392; }
-        .action-buttons {
-            margin-top: 0.6rem;
-            display: flex;
-            gap: 0.6rem;
-            justify-content: flex-end;
-        }
-        .btn-sm {
-            padding: 0.35rem 1rem;
-            border-radius: 40px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            background: #f0f4fa;
-            color: #2c5a7a;
-        }
-        .btn-primary-sm { background: #1f4b6e; color: white; }
-        .btn-danger-sm { background: #fee9e6; color: #bc3f1e; }
-
-        /* 弹窗 */
-        .modal-overlay {
+        /* 移动端遮罩层 */
+        .sidebar-overlay {
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.2s;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 品牌区域 */
+        .brand {
+            padding: 24px 20px;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+
+        .brand h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .brand p {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 6px;
+            font-weight: 400;
+        }
+
+        /* 导航菜单 */
+        .nav-menu {
+            flex: 1;
+            padding: 0 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-item i {
+            width: 22px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background: #1e293b;
+            color: white;
+        }
+
+        .nav-item.active {
+            background: #2d3a5e;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 分组标题 */
+        .nav-group-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 16px 16px 8px 16px;
+            color: #5b6e8c;
+            font-weight: 600;
+        }
+
+        /* 底部技术支持 */
+        .sidebar-footer {
+            padding: 20px 16px 24px;
+            border-top: 1px solid #2d3a4e;
+            font-size: 0.7rem;
+            color: #6c7f9c;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* ========= 右侧主内容 ========= */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: #f8fafc;
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
+        }
+
+        /* 顶部栏 - 移动端增加汉堡菜单按钮 */
+        .top-bar {
+            background: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9edf2;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #1e293b;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 8px;
+            border-radius: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s;
-            padding: 1rem;
+            -webkit-tap-highlight-color: transparent;
         }
-        .modal-overlay.active {
-            visibility: visible;
-            opacity: 1;
+
+        .menu-toggle:hover {
+            background: #f1f5f9;
         }
-        .modal-card {
+
+        .page-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1e293b, #2c3e66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            flex: 1;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-area i {
+            font-size: 1.2rem;
+            color: #5b6e8c;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .user-area i:hover {
+            color: #2c3e66;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: #eef2ff;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #2c3e66;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* 内容区域卡片网格 */
+        .content-pane {
+            padding: 20px 16px;
+        }
+
+        /* 桌面端增加内边距 */
+        @media (min-width: 768px) {
+            .content-pane {
+                padding: 28px 32px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .top-bar {
+                padding: 14px 28px;
+            }
+        }
+
+        /* 快捷卡片区 (工作台概览) 移动端自适应 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        .stat-card {
             background: white;
-            max-width: 460px;
-            width: 100%;
-            border-radius: 2rem;
-            overflow: hidden;
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+            border: 1px solid #edf2f7;
         }
-        .modal-header {
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #5b6e8c;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        @media (min-width: 768px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+        /* 表格卡片 - 移动端滚动 */
+        .data-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #eef2f8;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            overflow-x: auto;
+        }
+
+        @media (min-width: 768px) {
+            .data-card {
+                padding: 20px 24px;
+                margin-bottom: 28px;
+            }
+        }
+
+        .card-header {
             display: flex;
             justify-content: space-between;
-            padding: 1.2rem 1.4rem 0.6rem;
-            font-weight: 700;
-            border-bottom: 1px solid #eff3fa;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        .modal-body { padding: 1.2rem 1.4rem; }
-        .modal-field { margin-bottom: 1rem; }
-        .modal-field label { font-size: 0.75rem; font-weight: 600; color: #4a688b; display: block; margin-bottom: 0.3rem; }
-        .modal-field input, .modal-field select { width: 100%; padding: 0.7rem; border-radius: 1rem; border: 1px solid #d4e0ec; font-size: 0.85rem; }
-        .modal-buttons { display: flex; gap: 0.8rem; margin-top: 1.2rem; }
-        .close-modal { font-size: 1.8rem; cursor: pointer; color: #98a9c2; }
-        .toast-msg {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e2f3ee6;
-            color: white;
-            padding: 0.6rem 1.3rem;
-            border-radius: 60px;
+
+        .card-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        @media (min-width: 768px) {
+            .card-header h3 {
+                font-size: 1.25rem;
+            }
+        }
+
+        .badge-action {
+            background: #eef2ff;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #2c3e66;
+            cursor: default;
+            white-space: nowrap;
+        }
+
+        /* 搜索栏样式 - 优化体验 */
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 24px;
+            background: white;
+            padding: 6px 16px;
+            border-radius: 48px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .search-bar:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-bar i {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px 0;
+            font-size: 0.95rem;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .search-bar input::placeholder {
+            color: #cbd5e1;
+        }
+
+        .search-clear {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .search-clear:hover {
+            color: #475569;
+            background: #f1f5f9;
+        }
+
+        /* 表格样式 - 移动端水平滚动友好 */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        @media (max-width: 640px) {
+            table {
+                min-width: 700px;
+            }
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 12px 12px 0;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid #e9edf2;
+            font-size: 0.8rem;
+        }
+
+        td {
+            padding: 14px 12px 14px 0;
+            border-bottom: 1px solid #f0f2f5;
             font-size: 0.85rem;
-            z-index: 1100;
-            opacity: 0;
-            transition: opacity 0.2s;
-            pointer-events: none;
+            color: #1f2a44;
         }
-        .toast-msg.show { opacity: 1; }
-        .footer-note {
-            margin-top: 1.5rem;
+
+        .status-badge {
+            background: #dcfce7;
+            color: #15803d;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .status-warning {
+            background: #fff3e3;
+            color: #b45309;
+        }
+
+        .status-overdue {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .btn-icon {
+            color: #3b6e9e;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        /* 客情维护/销售线索简易卡片 */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .two-columns {
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
+        }
+
+        .clue-item {
+            background: #fefce8;
+            border-left: 4px solid #eab308;
+            padding: 10px 12px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .copyright {
             text-align: center;
             font-size: 0.7rem;
-            color: #8c9bb0;
+            color: #94a3b8;
+            padding: 16px 0 8px;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 12px;
         }
-        @media (min-width: 760px) {
-            .table-header {
-                display: grid;
-                grid-template-columns: 80px 1.5fr 1.2fr 100px 100px 140px;
-                gap: 0.5rem;
-                padding: 0.9rem 1rem;
-            }
-            .order-row {
-                display: grid;
-                grid-template-columns: 80px 1.5fr 1.2fr 100px 100px 140px;
-                gap: 0.5rem;
-                align-items: center;
-                padding: 0.8rem 1rem;
-            }
-            .order-field { display: contents; }
-            .field-label { display: none; }
-            .action-buttons { margin-top: 0; justify-content: flex-start; }
+
+        .no-result {
+            text-align: center;
+            padding: 48px 20px;
+            color: #94a3b8;
         }
-        button { touch-action: manipulation; }
+
+        .no-result i {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        /* 移动端微调 */
+        @media (max-width: 480px) {
+            .user-area i:first-child {
+                display: none;
+            }
+
+            .user-area {
+                gap: 10px;
+            }
+
+            .avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .badge-action {
+                font-size: 0.65rem;
+                padding: 3px 10px;
+            }
+        }
+
+       .vertical-company {
+    position: fixed;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-weight: 900;
+    font-size: 0.7rem;           /* 基础默认（适用于小屏平板） */
+    letter-spacing: 6px;
+    color: #d9512c;
+    background: linear-gradient(135deg, #e55a32, #b83a1a);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-shadow: 2px 2px 18px rgba(210, 80, 40, 0.5);
+    white-space: nowrap;
+    z-index: 99;
+    pointer-events: none;
+    opacity: 0.85;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
+}
+
+/* 移动端（手机） - 最小 */
+@media (max-width: 640px) {
+    .vertical-company {
+        font-size: 0.55rem;       /* 手机端更小 */
+        letter-spacing: 3px;
+        right: 4px;
+        opacity: 0.7;
+    }
+    body {
+        padding-right: 1.5rem;
+    }
+}
+
+/* 电脑端（桌面） - 比原版小，但比手机大 */
+@media (min-width: 1024px) {
+    .vertical-company {
+        font-size: 1.0rem;        /* 原1.9rem → 改成1.0rem，电脑端也变小了 */
+        letter-spacing: 8px;
+        right: 24px;
+        opacity: 0.8;
+    }
+}
+
+/* 超大屏幕可选稍微大一点但仍比原版小 */
+@media (min-width: 1440px) {
+    .vertical-company {
+        font-size: 1.1rem;
+        letter-spacing: 10px;
+    }
+}
     </style>
 </head>
+
 <body>
+    <div class="vertical-company">重庆联新德科技有限公司</div>
+    <div class="app-container">
+        <!-- 移动端遮罩 -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<!-- 右侧竖排大水印：公司名称醒目彩色 -->
-<div class="vertical-company">重庆联新德科技有限公司</div>
-
-<div class="admin-container">
-    <!-- 头部 -->
-    <div class="admin-header">
-        <div class="logo-area">
-            <h2>📋 新德租赁 · 订单后台</h2>
-            <p>设备租赁订单管理 | 实时状态更新</p>
-        </div>
-        <div class="stats-badge">📦 总订单 <span id="totalOrderCount">0</span></div>
-    </div>
-
-    <!-- ✨ 新增订单表单 -->
-    <div class="add-order-card">
-        <div class="section-title">
-            <span>➕</span> 添加新租赁订单
-        </div>
-        <div class="form-grid">
-            <div class="input-field">
-                <label>设备名称 *</label>
-                <input type="text" id="newDeviceName" placeholder="例: Apple iPhone 17 Pro Max" autocomplete="off">
+        <!-- 侧边栏 -->
+        <div class="sidebar" id="sidebar">
+            <div class="brand">
+                <h1>联德租赁</h1>
+                <p>Liande Lease · 智慧租凭</p>
             </div>
-            <div class="input-field">
-                <label>客户手机号 *</label>
-                <input type="tel" id="newPhone" placeholder="11位手机号" maxlength="11">
+            <div class="nav-menu">
+                <div class="nav-item active" data-view="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>工作台</span>
+                </div>
+                <div class="nav-item" data-view="products">
+                    <i class="fas fa-boxes"></i>
+                    <span>租赁品</span>
+                </div>
+                <div class="nav-item" data-view="orders">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>租赁订单</span>
+                </div>
+                <div class="nav-item" data-view="bills">
+                    <i class="fas fa-receipt"></i>
+                    <span>租赁账单</span>
+                </div>
+                <div class="nav-item" data-view="customers">
+                    <i class="fas fa-users"></i>
+                    <span>客户</span>
+                </div>
+                <div class="nav-item" data-view="maintain">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>客情维护</span>
+                </div>
+                <div class="nav-item" data-view="leads">
+                    <i class="fas fa-chart-line"></i>
+                    <span>销售线索</span>
+                </div>
+
+                <div class="nav-group-title">分组管理</div>
+                <div class="nav-item" data-view="ungrouped">
+                    <i class="fas fa-layer-group"></i>
+                    <span>未分组</span>
+                </div>
+                <div class="nav-item" data-view="customgroup">
+                    <i class="fas fa-pen-ruler"></i>
+                    <span>自定义分组</span>
+                </div>
+                <div class="nav-item" data-view="membermgmt">
+                    <i class="fas fa-user-friends"></i>
+                    <span>组员管理</span>
+                </div>
+                <div class="nav-item" data-view="categorymgmt">
+                    <i class="fas fa-tags"></i>
+                    <span>分类管理</span>
+                </div>
+                <div class="nav-group-title">其他</div>
+                <div class="nav-item" data-view="favorites">
+                    <i class="fas fa-star"></i>
+                    <span>我的收藏</span>
+                </div>
+                <div class="nav-item" data-view="cloud">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>云图库</span>
+                </div>
+                <div class="nav-item" data-view="recycle">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>回收站</span>
+                </div>
+                <div class="nav-item" data-view="microsite">
+                    <i class="fas fa-store"></i>
+                    <span>微官网</span>
+                </div>
             </div>
-            <div class="input-field">
-                <label>月租金 (¥) *</label>
-                <input type="number" id="newPrice" placeholder="租金金额" step="1">
-            </div>
-            <div class="input-field">
-                <label>订单状态</label>
-                <select id="newStatus">
-                    <option value="pending">待确认</option>
-                    <option value="renting">租赁中</option>
-                    <option value="completed">已完成</option>
-                </select>
-            </div>
-            <div class="input-field">
-                <label>备注 (选填)</label>
-                <input type="text" id="newRemark" placeholder="租期/预约信息">
+            <div class="sidebar-footer">
+                <i class="far fa-copyright"></i> 北京联德租赁 All Rights Reserved<br>
+
             </div>
         </div>
-        <button class="add-btn" id="addOrderBtn">✨ 立即创建订单</button>
-    </div>
 
-    <!-- 统计卡片 -->
-    <div class="stats-row">
-        <div class="stat-card"><div class="stat-title">待处理预约</div><div class="stat-number" id="pendingCount">0</div></div>
-        <div class="stat-card sub"><div class="stat-title">租赁中</div><div class="stat-number" id="rentingCount">0</div></div>
-        <div class="stat-card pending"><div class="stat-title">已完成/已归还</div><div class="stat-number" id="completedCount">0</div></div>
-    </div>
-
-    <!-- 筛选栏 -->
-    <div class="filter-bar">
-        <div class="filter-group"><label>🔍 订单状态</label><select id="statusFilter"><option value="all">全部</option><option value="pending">待确认</option><option value="renting">租赁中</option><option value="completed">已完成</option></select></div>
-        <div class="filter-group"><label>📱 手机号</label><input type="text" id="phoneSearch" placeholder="输入手机号查询"></div>
-        <div class="filter-group"><label>💻 设备名称</label><input type="text" id="deviceSearch" placeholder="关键词"></div>
-        <button class="search-btn" id="searchBtn">🔍 筛选</button>
-        <button class="search-btn reset-btn" id="resetBtn">重置</button>
-    </div>
-
-    <!-- 订单列表 -->
-    <div class="orders-table">
-        <div class="table-header">
-            <span>订单ID</span><span>设备信息</span><span>客户手机</span><span>月租金(¥)</span><span>状态</span><span>操作</span>
-        </div>
-        <div id="ordersListContainer"></div>
-    </div>
-    <div class="footer-note">✅ 支持添加订单、编辑、状态流转 | 右侧公司标识为重庆联新德科技</div>
-</div>
-
-<!-- 编辑弹窗 -->
-<div id="editModal" class="modal-overlay">
-    <div class="modal-card">
-        <div class="modal-header"><span>✏️ 编辑订单</span><span class="close-modal" id="closeEditModalBtn">&times;</span></div>
-        <div class="modal-body">
-            <input type="hidden" id="editOrderId">
-            <div class="modal-field"><label>设备名称</label><input type="text" id="editDeviceName"></div>
-            <div class="modal-field"><label>客户手机号</label><input type="text" id="editPhone" maxlength="11"></div>
-            <div class="modal-field"><label>月租金 (¥)</label><input type="number" id="editPrice" step="1"></div>
-            <div class="modal-field"><label>订单状态</label><select id="editStatus"><option value="pending">待确认</option><option value="renting">租赁中</option><option value="completed">已完成</option></select></div>
-            <div class="modal-field"><label>备注</label><input type="text" id="editRemark"></div>
-            <div class="modal-buttons"><button class="search-btn" id="saveEditBtn">保存修改</button><button class="search-btn reset-btn" id="cancelEditBtn">取消</button></div>
+        <!-- 右侧内容区域 -->
+        <div class="main-content">
+            <div class="top-bar">
+                <button class="menu-toggle" id="menuToggle" aria-label="菜单">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title" id="mainTitle">工作台</div>
+                <div class="user-area">
+                    <i class="far fa-bell"></i>
+                    <i class="fas fa-cog"></i>
+                    <div class="avatar">李</div>
+                </div>
+            </div>
+            <div class="content-pane" id="dynamicContent">
+                <!-- 动态渲染 -->
+            </div>
         </div>
     </div>
-</div>
 
-<div id="globalToast" class="toast-msg">✅ 操作成功</div>
+    <script>
+        // ======================== 丰富的订单数据（用于检索功能，性能优化）========================
+        const ordersData = [
+            { id: 'LD2408-101', customer: '华云数字', product: '浪潮服务器*2', period: '2024-08-01 ~ 2024-11-01', account: '6217****1111 工商银行', 收款账户: '6217****1111 工商银行', amount: '¥18,000', status: '进行中', statusType: 'normal' },
+            { id: 'LD2408-102', customer: '智创未来', product: 'RTX 4090工作站', period: '2024-09-10 ~ 2024-10-10', account: '6217****2222 工商银行', 收款账户: '6217****2222 工商银行', amount: '¥6,500', status: '待归还', statusType: 'warning' },
+            { id: 'LD2409-203', customer: '博瑞传媒', product: '索尼FX6摄影机', period: '2024-09-15 ~ 2024-09-30', account: '6217****3333 工商银行', 收款账户: '6217****3333 工商银行', amount: '¥4,200', status: '已完成', statusType: 'normal' },
+            { id: 'LD2410-001', customer: '智绘设计', product: '专业图形工作站', period: '2024-10-01 ~ 2024-10-30', account: '6215****8888 建设银行', 收款账户: '6215****8888 建设银行', amount: '¥7,500', status: '租赁中', statusType: 'normal' },
+            { id: 'LD2410-045', customer: '深蓝医疗', product: '会议大屏86寸', period: '2024-09-20 ~ 2024-10-20', account: '6230****6666 农业银行', 收款账户: '6230****6666 农业银行', amount: '¥2,800', status: '逾期', statusType: 'overdue' },
+            { id: 'LD2411-012', customer: '云创动力', product: '高性能服务器集群', period: '2024-11-01 ~ 2025-01-31', account: '6217****9999 工商银行', 收款账户: '6217****9999 工商银行', amount: '¥32,000', status: '进行中', statusType: 'normal' },
+            { id: 'LD2411-089', customer: '智云科技', product: 'MacBook Pro 16寸', period: '2024-11-05 ~ 2024-12-05', account: '6215****1234 建设银行', 收款账户: '6215****1234 建设银行', amount: '¥3,200', status: '待发货', statusType: 'warning' },
+            { id: 'LD2411-102', customer: '华云数字', product: '网络存储设备', period: '2024-11-10 ~ 2024-12-10', account: '6217****1111 工商银行', 收款账户: '6217****1111 工商银行', amount: '¥5,600', status: '租赁中', statusType: 'normal' }
+        ];
 
-<script>
-    // ---------- 模拟订单数据 ----------
-    let orders = [
-        { id: 1001, deviceName: "Apple iPhone 17 Pro Max", phone: "13812345678", price: 2166, status: "pending", remark: "预约时间 2026-04-03", createdAt: "2026-04-01" },
-        { id: 1002, deviceName: "华为荣耀MateBook D14 锐龙版", phone: "15987654321", price: 1216, status: "renting", remark: "租期一个月，已发顺丰", createdAt: "2026-03-28" },
-        { id: 1003, deviceName: "Apple MacBook Air M1", phone: "17723238990", price: 2066, status: "completed", remark: "已归还，押金退还", createdAt: "2026-03-20" },
-        { id: 1004, deviceName: "ThinkPad T460 工作站", phone: "18856783412", price: 1566, status: "pending", remark: "企业客户预约，待审核", createdAt: "2026-04-02" },
-        { id: 1005, deviceName: "Apple iPhone 17 Pro", phone: "13566778899", price: 1950, status: "renting", remark: "高端商务机，租期2个月", createdAt: "2026-03-25" },
-        { id: 1006, deviceName: "小米 RedmiBook 商务本", phone: "15622334455", price: 1988, status: "pending", remark: "学生优惠季", createdAt: "2026-04-01" },
-        { id: 1007, deviceName: "惠普 Zbook 15 G3 工作站", phone: "18933445566", price: 1888, status: "renting", remark: "设计师专用，已签合同", createdAt: "2026-03-30" },
-        { id: 1008, deviceName: "Apple iPhone 16 Plus", phone: "15099887766", price: 1950, status: "completed", remark: "租期结束，设备完好", createdAt: "2026-03-15" },
-        { id: 1009, deviceName: "联想ThinkPad T440 经典版", phone: "18612348765", price: 1455, status: "pending", remark: "企业免押金预约", createdAt: "2026-04-02" },
-        { id: 1010, deviceName: "荣耀MateBook D14 轻薄本", phone: "13822334455", price: 1366, status: "renting", remark: "网课专用，已发货", createdAt: "2026-03-29" }
-    ];
-
-    let nextId = 1011;
-
-    // DOM 元素
-    const ordersContainer = document.getElementById('ordersListContainer');
-    const statusFilter = document.getElementById('statusFilter');
-    const phoneSearch = document.getElementById('phoneSearch');
-    const deviceSearch = document.getElementById('deviceSearch');
-    const searchBtn = document.getElementById('searchBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const totalOrderSpan = document.getElementById('totalOrderCount');
-    const pendingCountSpan = document.getElementById('pendingCount');
-    const rentingCountSpan = document.getElementById('rentingCount');
-    const completedCountSpan = document.getElementById('completedCount');
-
-    // 新增表单元素
-    const newDeviceName = document.getElementById('newDeviceName');
-    const newPhone = document.getElementById('newPhone');
-    const newPrice = document.getElementById('newPrice');
-    const newStatus = document.getElementById('newStatus');
-    const newRemark = document.getElementById('newRemark');
-    const addOrderBtn = document.getElementById('addOrderBtn');
-
-    // 弹窗相关
-    const editModal = document.getElementById('editModal');
-    const editOrderId = document.getElementById('editOrderId');
-    const editDeviceName = document.getElementById('editDeviceName');
-    const editPhone = document.getElementById('editPhone');
-    const editPrice = document.getElementById('editPrice');
-    const editStatus = document.getElementById('editStatus');
-    const editRemark = document.getElementById('editRemark');
-    const saveEditBtn = document.getElementById('saveEditBtn');
-    const closeEditModalBtn = document.getElementById('closeEditModalBtn');
-    const cancelEditBtn = document.getElementById('cancelEditBtn');
-    const toastEl = document.getElementById('globalToast');
-
-    function showToast(msg, isError = false) {
-        toastEl.innerText = msg || (isError ? '❌ 操作失败' : '✅ 操作成功');
-        toastEl.classList.add('show');
-        setTimeout(() => toastEl.classList.remove('show'), 2000);
-    }
-
-    function updateStats() {
-        totalOrderSpan.innerText = orders.length;
-        pendingCountSpan.innerText = orders.filter(o => o.status === 'pending').length;
-        rentingCountSpan.innerText = orders.filter(o => o.status === 'renting').length;
-        completedCountSpan.innerText = orders.filter(o => o.status === 'completed').length;
-    }
-
-    function statusToCN(status) {
-        if (status === 'pending') return '待确认';
-        if (status === 'renting') return '租赁中';
-        if (status === 'completed') return '已完成';
-        return status;
-    }
-    function getStatusClass(status) {
-        if (status === 'pending') return 'status-pending';
-        if (status === 'renting') return 'status-renting';
-        if (status === 'completed') return 'status-paid';
-        return '';
-    }
-
-    function renderOrders(filteredOrders) {
-        if (!filteredOrders.length) {
-            ordersContainer.innerHTML = `<div style="padding: 2rem; text-align:center; color:#8ba0bc;">暂无订单数据</div>`;
-            return;
+        // 辅助函数：转义HTML
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
         }
-        let html = '';
-        filteredOrders.forEach(order => {
-            html += `
-                <div class="order-row" data-order-id="${order.id}">
-                    <div class="order-field"><span class="field-label">订单号</span><span class="field-value">#${order.id}</span></div>
-                    <div class="order-field"><span class="field-label">设备</span><span class="field-value"><strong>${escapeHtml(order.deviceName)}</strong><br><span style="font-size:0.7rem; color:#7b8aa3;">${order.remark ? order.remark.substring(0, 28) : ''}</span></span></div>
-                    <div class="order-field"><span class="field-label">手机号</span><span class="field-value">${order.phone}</span></div>
-                    <div class="order-field"><span class="field-label">月租金</span><span class="field-value">¥${order.price}</span></div>
-                    <div class="order-field"><span class="field-label">状态</span><span class="field-value"><span class="order-status ${getStatusClass(order.status)}">${statusToCN(order.status)}</span></span></div>
-                    <div class="action-buttons">
-                        <button class="btn-sm btn-primary-sm" data-action="edit" data-id="${order.id}">✏️ 编辑</button>
-                        <button class="btn-sm btn-danger-sm" data-action="delete" data-id="${order.id}">🗑 删除</button>
-                        ${order.status !== 'completed' ? `<button class="btn-sm" data-action="markComplete" data-id="${order.id}">✅ 完成归还</button>` : ''}
-                        ${order.status === 'pending' ? `<button class="btn-sm" data-action="startRent" data-id="${order.id}">🚀 开始租赁</button>` : ''}
-                    </div>
+
+        // 根据状态返回样式类
+        function getStatusClass(statusType, status) {
+            if (statusType === 'overdue' || status === '逾期') return 'status-overdue';
+            if (status === '待归还' || status === '待发货') return 'status-warning';
+            return 'status-badge';
+        }
+
+        // 渲染订单表格（高性能，直接操作DOM字符串）
+        function renderOrdersTable(orderList) {
+            if (!orderList || orderList.length === 0) {
+                return `
+                <div class="no-result">
+                    <i class="fas fa-search"></i>
+                    <p>未找到相关订单，请尝试其他关键词</p>
                 </div>
             `;
-        });
-        ordersContainer.innerHTML = html;
-        attachOrderEvents();
-    }
+            }
 
-    function attachOrderEvents() {
-        document.querySelectorAll('[data-action="edit"]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openEditModal(parseInt(btn.dataset.id)); }));
-        document.querySelectorAll('[data-action="delete"]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); if(confirm('确认删除该订单吗？')) deleteOrderById(parseInt(btn.dataset.id)); }));
-        document.querySelectorAll('[data-action="markComplete"]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); updateOrderStatus(parseInt(btn.dataset.id), 'completed'); }));
-        document.querySelectorAll('[data-action="startRent"]').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); updateOrderStatus(parseInt(btn.dataset.id), 'renting'); }));
-    }
+            const rows = orderList.map(order => {
+                const statusClass = getStatusClass(order.statusType, order.status);
+                return `
+                <tr>
+                    <td><strong>${escapeHtml(order.id)}</strong></td>
+                    <td>${escapeHtml(order.customer)}</td>
+                    <td>${escapeHtml(order.product)}</td>
+                    <td style="white-space: nowrap;">${escapeHtml(order.period)}</td>
+                    <td>${escapeHtml(order.account)}</td>
+                    <td>${escapeHtml(order.收款账户)}</td>
+                    <td><strong>${escapeHtml(order.amount)}</strong></td>
+                    <td><span class="${statusClass}">${escapeHtml(order.status)}</span></td>
+                </tr>
+            `;
+            }).join('');
 
-    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
-
-    function updateOrderStatus(id, newStatus) {
-        const order = orders.find(o => o.id === id);
-        if (order) {
-            order.status = newStatus;
-            if (newStatus === 'renting') order.remark = (order.remark ? order.remark + ' · 已转为租赁中' : '已转为租赁中');
-            if (newStatus === 'completed') order.remark = (order.remark ? order.remark + ' · 已完成归还' : '已完成归还');
-            applyFiltersAndRender();
-            showToast(`订单 #${id} 状态已更新为 ${statusToCN(newStatus)}`);
-            updateStats();
+            return `
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>订单编号</th><th>客户名称</th><th>租赁产品</th><th>起止时间</th><th>打卡账户</th><th>收款账户</th><th>总金额</th><th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        `;
         }
-    }
 
-    function deleteOrderById(id) {
-        orders = orders.filter(o => o.id !== id);
-        applyFiltersAndRender();
-        updateStats();
-        showToast(`订单 #${id} 已删除`);
-    }
+        // 订单视图控制器（优化检索性能，无卡顿）
+        let currentFilter = '';
+        let ordersContainerElement = null;
 
-    // 添加新订单
-    function addNewOrder() {
-        const device = newDeviceName.value.trim();
-        const phone = newPhone.value.trim();
-        const price = parseFloat(newPrice.value);
-        if (!device) { showToast('请填写设备名称', true); return; }
-        if (!/^1[0-9]{10}$/.test(phone)) { showToast('请输入正确的11位手机号', true); return; }
-        if (isNaN(price) || price <= 0) { showToast('租金必须大于0', true); return; }
-        const newOrder = {
-            id: nextId++,
-            deviceName: device,
-            phone: phone,
-            price: price,
-            status: newStatus.value,
-            remark: newRemark.value.trim() || '新预约订单',
-            createdAt: new Date().toISOString().slice(0,10)
+        // 核心过滤函数
+        function getFilteredOrders() {
+            if (!currentFilter.trim()) return ordersData;
+            const keyword = currentFilter.trim().toLowerCase();
+            return ordersData.filter(order =>
+                order.id.toLowerCase().includes(keyword) ||
+                order.customer.toLowerCase().includes(keyword)
+            );
+        }
+
+        // 刷新订单视图（仅更新表格区域，避免重建整个卡片）
+        function updateOrdersTableOnly() {
+            const tableContainer = document.getElementById('orders-table-container');
+            if (tableContainer) {
+                const filtered = getFilteredOrders();
+                tableContainer.innerHTML = renderOrdersTable(filtered);
+            }
+        }
+
+        // 完整渲染订单页面（首次加载或需要重建时）
+        function renderFullOrdersView() {
+            const filtered = getFilteredOrders();
+            const html = `
+            <div class="data-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-invoice"></i> 租赁订单列表</h3>
+                    <span class="badge-action">共 ${ordersData.length} 条记录</span>
+                </div>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="orderSearchInput" placeholder="按订单编号或客户名称快速检索..." autocomplete="off">
+                    <button class="search-clear" id="clearSearchBtn" style="display: none;"><i class="fas fa-times-circle"></i></button>
+                </div>
+                <div id="orders-table-container">
+                    ${renderOrdersTable(filtered)}
+                </div>
+            </div>
+            <div class="copyright">Copyright 联德租赁 All Rights Reserved </div>
+        `;
+            return html;
+        }
+
+        // 绑定订单页搜索事件（优化版，无重复绑定，性能流畅）
+        function bindOrderSearchEvents() {
+            const searchInput = document.getElementById('orderSearchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            if (!searchInput) return;
+
+            // 移除旧的监听器，使用新的
+            const newSearchInput = searchInput.cloneNode(true);
+            searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+
+            const finalInput = document.getElementById('orderSearchInput');
+            const finalClear = document.getElementById('clearSearchBtn');
+
+            const updateSearch = () => {
+                const newVal = finalInput.value;
+                currentFilter = newVal;
+                if (finalClear) {
+                    finalClear.style.display = currentFilter ? 'flex' : 'none';
+                }
+                // 直接更新表格，无需重新渲染整个卡片，极致流畅
+                const filtered = getFilteredOrders();
+                const tableContainer = document.getElementById('orders-table-container');
+                if (tableContainer) {
+                    tableContainer.innerHTML = renderOrdersTable(filtered);
+                }
+            };
+
+            finalInput.addEventListener('input', updateSearch);
+            finalInput.addEventListener('keyup', (e) => {
+                // 增强响应
+                updateSearch();
+            });
+
+            if (finalClear) {
+                const newClearBtn = finalClear.cloneNode(true);
+                finalClear.parentNode.replaceChild(newClearBtn, finalClear);
+                const refreshedClear = document.getElementById('clearSearchBtn');
+                if (refreshedClear) {
+                    refreshedClear.addEventListener('click', () => {
+                        const inputElem = document.getElementById('orderSearchInput');
+                        if (inputElem) {
+                            inputElem.value = '';
+                            currentFilter = '';
+                            if (refreshedClear) refreshedClear.style.display = 'none';
+                            const filtered = getFilteredOrders();
+                            const tableContainer = document.getElementById('orders-table-container');
+                            if (tableContainer) {
+                                tableContainer.innerHTML = renderOrdersTable(filtered);
+                            }
+                            inputElem.focus();
+                        }
+                    });
+                }
+            }
+        }
+
+        // 其他视图保持不变（工作台、租赁品等）
+        const views = {
+            dashboard: () => `
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-title">在租设备</div><div class="stat-number">328</div></div>
+                <div class="stat-card"><div class="stat-title">本月订单</div><div class="stat-number">64</div></div>
+                <div class="stat-card"><div class="stat-title">应收租金</div><div class="stat-number">¥128.6k</div></div>
+                <div class="stat-card"><div class="stat-title">活跃客户</div><div class="stat-number">187</div></div>
+            </div>
+            <div class="data-card">
+                <div class="card-header"><h3>近期租赁订单</h3><span class="badge-action">今日更新</span></div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>订单号</th><th>客户</th><th>租赁品</th><th>金额</th><th>状态</th></tr></thead>
+                        <tbody>
+                            <tr><td>LD-240901</td><td>云创科技</td><td>高性能服务器</td><td>¥8,200</td><td><span class="status-badge">租赁中</span></td></tr>
+                            <tr><td>LD-240902</td><td>智绘设计</td><td>图形工作站</td><td>¥3,650</td><td><span class="status-badge">待发货</span></td></tr>
+                            <tr><td>LD-240903</td><td>深蓝医疗</td><td>会议大屏86寸</td><td>¥2,200</td><td><span class="status-overdue">逾期</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="data-card">
+                <div class="card-header"><h3>待办提醒</h3><span class="badge-action">客情维护待跟进</span></div>
+                <div class="clue-item"><i class="fas fa-phone-alt"></i> 联系“启航设备”续签合同，今日到期</div>
+                <div class="clue-item"><i class="fas fa-file-signature"></i> 3笔租赁账单逾期，请及时催收</div>
+            </div>
+            <div class="copyright">Copyright 联德租赁 All Rights Reserved</div>
+        `,
+            products: () => `
+            <div class="data-card">
+                <div class="card-header"><h3>租赁品管理</h3><span class="badge-action"><i class="fas fa-plus"></i> 新增设备</span></div>
+                <div class="table-wrapper">
+                    <table><thead><tr><th>设备名称</th><th>分类</th><th>库存</th><th>日租金</th><th>状态</th></tr></thead>
+                    <tbody>
+                        <tr><td>Apple/苹果 iPhone 17 Pro Max</td><td>手机</td><td>23</td><td>￥2166.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                         <tr><td>Apple/苹果 iPhone 17</td><td>手机</td><td>12</td><td>￥1333.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>Apple/苹果 iPhone 17 Pro</td><td>手机</td><td>32</td><td>￥1950.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>Apple/苹果 iPhone 16 Plus</td><td>手机</td><td>23</td><td>￥1950.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>华为荣耀MateBook D14 锐龙版</td><td>笔记本</td><td>15</td><td>￥1216.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>华为荣耀MateBook D14 轻薄本</td><td>笔记本</td><td>8</td><td>￥1366.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>ThinkPad T460 / W541 工作站</td><td>笔记本</td><td>5</td><td>￥1566.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>商务办公笔记本 · 爆款热租</td><td>笔记本</td><td>34</td><td>￥1544.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>联想ThinkPad T440 经典版</td><td>笔记本</td><td>43</td><td>￥1455.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>小米 RedmiBook 商务本</td><td>笔记本</td><td>24</td><td>￥1988.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>惠普 Zbook 15 G3 移动工作站</td><td>笔记本</td><td>15</td><td>￥1888.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>Apple MacBook Air 超薄款 MD760</td><td>笔记本</td><td>35</td><td>￥2133.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                        <tr><td>Apple MacBook Air M1 八核</td><td>笔记本</td><td>43</td><td>￥2066.00/月</td><td><span class="status-badge">可租</span></td></tr>
+                    </tbody></table>
+                </div>
+            </div>
+            <div class="copyright">Copyright 联德租赁 All Rights Reserved</div>
+        `,
+            orders: () => {
+                // 重置过滤器
+                currentFilter = '';
+                return renderFullOrdersView();
+            },
+            bills: () => `<div class="data-card"><div class="card-header"><h3>租赁账单概览</h3><span class="badge-action">本月应收 ¥94,200</span></div><div class="table-wrapper"><table><thead><tr><th>客户</th><th>账单周期</th><th>应收金额</th><th>已付</th><th>状态</th></tr></thead><tbody><tr><td>杭州智云科技</td><td>2024-09</td><td>¥12,300</td><td>¥12,300</td><td><span class="status-badge">已结清</span></td></tr><tr><td>苏州工业智能</td><td>2024-09</td><td>¥8,450</td><td>¥0</td><td><span class="status-warning">逾期</span></td></tr><tr><td>北京联合设计</td><td>2024-09</td><td>¥3,200</td><td>¥3,200</td><td><span class="status-badge">已结清</span></td></tr></tbody></table></div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            customers: () => `<div class="data-card"><div class="card-header"><h3>客户管理</h3><span class="badge-action"><i class="fas fa-user-plus"></i> 新增客户</span></div><div class="table-wrapper"><table><thead><tr><th>客户名称</th><th>联系人</th><th>电话</th><th>租赁次数</th><th>信用评级</th></tr></thead><tbody><tr><td>云创动力</td><td>张经理</td><td>138****1102</td><td>12</td><td>AA+</td></tr><tr><td>智汇科技</td><td>李思源</td><td>159****4501</td><td>7</td><td>A</td></tr><tr><td>天启教育</td><td>王芳</td><td>188****3320</td><td>3</td><td>B+</td></tr></tbody></table></div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            maintain: () => `<div class="two-columns"><div class="data-card"><div class="card-header"><h3>近期待跟进客户</h3></div><div class="clue-item"><i class="fas fa-calendar-week"></i> 华锐精密 | 上次拜访: 20天前 → 建议回访</div><div class="clue-item"><i class="fas fa-gift"></i> 恒通集团 | 租期即将结束，续租洽谈</div><div class="clue-item"><i class="fas fa-comment-dots"></i> 智云科技 | 设备使用反馈收集</div></div><div class="data-card"><div class="card-header"><h3>客情维护记录</h3></div><div><i class="fas fa-check-circle" style="color:#10b981;"></i> 9月20日 为海创企业提供技术培训</div><div><i class="fas fa-check-circle" style="color:#10b981;"></i> 9月18日 赠送中秋定制礼盒</div><div><i class="fas fa-clock"></i> 计划明日拜访“联强建设”</div></div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            leads: () => `<div class="data-card"><div class="card-header"><h3>销售线索池</h3><span class="badge-action">新增线索</span></div><div class="table-wrapper"><table><thead><tr><th>公司名称</th><th>来源</th><th>意向设备</th><th>跟进人</th><th>状态</th></tr></thead><tbody><tr><td>卓远新能源</td><td>官网咨询</td><td>数据存储阵列</td><td>李潇</td><td>初步沟通</td></tr><tr><td>鼎峰制造</td><td>转介绍</td><td>会议平板+笔记本</td><td>王哲</td><td>方案报价</td></tr><tr><td>极客未来</td><td>展会</td><td>VR/AR租赁套件</td><td>张敏</td><td>意向强烈</td></tr></tbody></table></div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            ungrouped: () => `<div class="data-card"><div class="card-header"><h3>未分组联系人/客户</h3></div><p style="padding: 12px 0;">共有 24 位客户尚未分配至任何分组，可批量管理分组。</p><div class="badge-action" style="display:inline-block;">一键分配</div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            customgroup: () => `<div class="data-card"><div class="card-header"><h3>自定义分组</h3></div><p>VIP客户组、高潜组、高校客户组、华东区域组... <br><span style="color:#3b82f6;">+ 新建自定义分组</span></p></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            membermgmt: () => `<div class="data-card"><div class="card-header"><h3>组员管理</h3></div><div class="table-wrapper"><table><thead><tr><th>姓名</th><th>所属分组</th><th>角色</th><th>操作</th></tr></thead><tbody><tr><td>王启航</td><td>销售一组</td><td>组长</td><td><i class="fas fa-edit btn-icon"></i></td></tr><tr><td>李雅欣</td><td>销售二组</td><td>组员</td><td><i class="fas fa-edit btn-icon"></i></td></tr></tbody></table></div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved  ：企业魔方CRM@力迅效能</div>`,
+            categorymgmt: () => `<div class="data-card"><div class="card-header"><h3>分类管理</h3></div><div>笔记本 / 台式机 / 服务器 / 影音设备 / 会议大屏 / 摄影器材 / 网络设备</div><div style="margin-top:20px;"><i class="fas fa-plus-circle"></i> 新增分类</div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            favorites: () => `<div class="data-card"><div class="card-header"><h3>我的收藏</h3></div><div>⭐ 租赁品: MacBook Pro 定制版</div><div>⭐ 客户: 云创动力</div><div>⭐ 常用报表: 租赁分析月报</div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved </div>`,
+            cloud: () => `<div class="data-card"><div class="card-header"><h3>云图库</h3></div><div style="display:flex; gap:16px; flex-wrap:wrap; align-items:center;"><div style="width:70px;height:70px;background:#eef2ff;border-radius:16px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-image fa-2x"></i></div><div>产品图片/合同扫描件等云端存储</div></div></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            recycle: () => `<div class="data-card"><div class="card-header"><h3>回收站</h3></div><p>已删除租赁品 3件，订单记录 2条，客户 1位，可恢复或彻底删除。</p></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`,
+            microsite: () => `<div class="data-card"><div class="card-header"><h3>微官网配置</h3></div><p>企业对外展示微官网，支持装修、案例展示、在线咨询。<br><span class="badge-action">预览微官网</span> <span class="badge-action">编辑页面</span></p></div><div class="copyright">Copyright 联德租赁 All Rights Reserved</div>`
         };
-        orders.unshift(newOrder);
-        // 清空表单
-        newDeviceName.value = '';
-        newPhone.value = '';
-        newPrice.value = '';
-        newStatus.value = 'pending';
-        newRemark.value = '';
-        applyFiltersAndRender();
-        updateStats();
-        showToast(`✅ 订单 #${newOrder.id} 添加成功`);
-    }
 
-    function openEditModal(id) {
-        const order = orders.find(o => o.id === id);
-        if (!order) return;
-        editOrderId.value = order.id;
-        editDeviceName.value = order.deviceName;
-        editPhone.value = order.phone;
-        editPrice.value = order.price;
-        editStatus.value = order.status;
-        editRemark.value = order.remark || '';
-        editModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
+        const titleMap = {
+            dashboard: '工作台', products: '租赁品', orders: '租赁订单', bills: '租赁账单', customers: '客户',
+            maintain: '客情维护', leads: '销售线索', ungrouped: '未分组', customgroup: '自定义分组',
+            membermgmt: '组员管理', categorymgmt: '分类管理', favorites: '我的收藏', cloud: '云图库',
+            recycle: '回收站', microsite: '微官网'
+        };
 
-    function closeModal() { editModal.classList.remove('active'); document.body.style.overflow = ''; }
-    function saveEditOrder() {
-        const id = parseInt(editOrderId.value);
-        const idx = orders.findIndex(o => o.id === id);
-        if (idx === -1) { showToast('订单不存在', true); closeModal(); return; }
-        const newPhoneVal = editPhone.value.trim();
-        if (!/^1[0-9]{10}$/.test(newPhoneVal)) { showToast('手机号格式错误', true); return; }
-        const newPriceVal = parseFloat(editPrice.value);
-        if (isNaN(newPriceVal) || newPriceVal <= 0) { showToast('租金需大于0', true); return; }
-        orders[idx] = { ...orders[idx], deviceName: editDeviceName.value.trim() || orders[idx].deviceName, phone: newPhoneVal, price: newPriceVal, status: editStatus.value, remark: editRemark.value };
-        applyFiltersAndRender();
-        updateStats();
-        showToast(`订单 #${id} 更新成功`);
-        closeModal();
-    }
+        function renderView(viewId) {
+            const contentDiv = document.getElementById('dynamicContent');
+            const renderFunc = views[viewId];
+            if (renderFunc) {
+                contentDiv.innerHTML = renderFunc();
+                if (viewId === 'orders') {
+                    // 订单页面绑定高性能搜索事件
+                    bindOrderSearchEvents();
+                }
+            } else {
+                contentDiv.innerHTML = `<div class="data-card">暂未开放，敬请期待</div><div class="copyright">Copyright 联德租赁 All Rights Reserved  ：企业魔方CRM@力迅效能</div>`;
+            }
+            const titleElem = document.getElementById('mainTitle');
+            if (titleElem) titleElem.innerText = titleMap[viewId] || '联德租赁';
 
-    function getFilteredOrders() {
-        let filtered = [...orders];
-        const statusVal = statusFilter.value;
-        const phoneVal = phoneSearch.value.trim();
-        const deviceVal = deviceSearch.value.trim().toLowerCase();
-        if (statusVal !== 'all') filtered = filtered.filter(o => o.status === statusVal);
-        if (phoneVal) filtered = filtered.filter(o => o.phone.includes(phoneVal));
-        if (deviceVal) filtered = filtered.filter(o => o.deviceName.toLowerCase().includes(deviceVal));
-        return filtered;
-    }
-    function applyFiltersAndRender() { renderOrders(getFilteredOrders()); }
-    function resetFilters() { statusFilter.value = 'all'; phoneSearch.value = ''; deviceSearch.value = ''; applyFiltersAndRender(); }
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-view') === viewId) {
+                    item.classList.add('active');
+                }
+            });
+            if (window.innerWidth < 992) closeSidebar();
+        }
 
-    function init() {
-        renderOrders(orders);
-        updateStats();
-        searchBtn.addEventListener('click', applyFiltersAndRender);
-        resetBtn.addEventListener('click', resetFilters);
-        addOrderBtn.addEventListener('click', addNewOrder);
-        saveEditBtn.addEventListener('click', saveEditOrder);
-        closeEditModalBtn.addEventListener('click', closeModal);
-        cancelEditBtn.addEventListener('click', closeModal);
-        editModal.addEventListener('click', (e) => { if(e.target === editModal) closeModal(); });
-        phoneSearch.addEventListener('keypress', (e) => { if(e.key === 'Enter') applyFiltersAndRender(); });
-        deviceSearch.addEventListener('keypress', (e) => { if(e.key === 'Enter') applyFiltersAndRender(); });
-    }
-    init();
-</script>
+        function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); document.body.style.overflow = ''; }
+        function toggleSidebar() { const s = document.getElementById('sidebar'); s.classList.contains('open') ? closeSidebar() : openSidebar(); }
+
+        function bindEvents() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => { const view = item.getAttribute('data-view'); if (view) renderView(view); e.stopPropagation(); });
+            });
+            document.getElementById('menuToggle')?.addEventListener('click', toggleSidebar);
+            document.getElementById('sidebarOverlay')?.addEventListener('click', closeSidebar);
+            window.addEventListener('resize', () => { if (window.innerWidth >= 992) { closeSidebar(); document.getElementById('sidebar').classList.remove('open'); document.body.style.overflow = ''; } });
+            renderView('dashboard');
+        }
+        bindEvents();
+    </script>
 </body>
+
 </html>
